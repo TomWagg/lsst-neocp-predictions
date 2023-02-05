@@ -128,3 +128,17 @@ dmypy.json
 # Pyre type checker
 .pyre/
 thor/
+
+# ignore data
+*.s3m
+*.npy
+*.h5
+*.DAT
+catalogues/*
+*dask-worker-space/*
+*.csv
+*.dat
+*.obs
+*.synctex.gz
+digest2/*
+*.db
