@@ -1,1 +1,3 @@
-# The Sky is Falling?! NEO Follow-up in the Era of LSST
+<div align="center">
+  <img src="header_img.png" width="100%">
+</div>
