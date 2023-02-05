@@ -1,0 +1,18 @@
+name: neocp
+channels:
+  - defaults
+  - conda-forge
+  - moeyensj
+dependencies:
+  - python
+  - numpy
+  - pandas
+  - astropy
+  - matplotlib
+  - ipython
+  - jupyter
+  - jupyterlab
+  - difi
+  - pytables
+  - thor
+  - rubin_sim
