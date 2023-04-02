@@ -25,7 +25,7 @@ from scheduling import get_LSST_schedule
 from magnitudes import convert_colour_mags
 
 import sys
-sys.path.append("../neocp")
+sys.path.append("../current_criteria")
 from lsst_neocp import find_first_file, find_last_file
 
 
