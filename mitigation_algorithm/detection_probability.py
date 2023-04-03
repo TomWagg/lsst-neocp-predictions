@@ -66,7 +66,7 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
     """
     start = time.time()
     lap = time.time()
-    path = f"/epyc/projects/hybrid-sso-catalogs/neocp/{obj_type}/"
+    path = f"/epyc/projects/neocp-predictions/current_criteria/{obj_type}/"
 
     # create a list of nights in the detection window and get schedule for them
     night_list = list(range(night_start, night_start + detection_window))
