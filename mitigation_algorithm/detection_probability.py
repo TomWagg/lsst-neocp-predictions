@@ -110,16 +110,23 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
         all_obs = pd.read_hdf(path + f"filtered_visit_scores_{end_file:03d}.h5").sort_values("FieldMJD")
     else:
         obs_dfs = [pd.read_hdf(path + f"filtered_visit_scores_{i:03d}.h5").sort_values("FieldMJD")
-                    for i in range(start_file, end_file + 1)]
+                   for i in range(start_file, end_file + 1)]
         all_obs = pd.concat(obs_dfs)
 
     print(f"[{time.time() - lap:1.1f}s] Observation files read in")
     lap = time.time()
-    
+
     # get the sorted observations for the start night (that have digest2 > 65, >= 3 obs)
     sorted_obs = all_obs[(all_obs["night"] == night_start)
                          & (all_obs["scores"] >= 65)
                          & (all_obs["n_obs"] >= 3)].sort_values(["ObjID", "FieldMJD"])
+
+    # if we are doing NEOs, remove any that would leave a trail in an LSST exposure
+    if obj_type == "neo":
+        streakers = pd.read_hdf('neo_streakers.h5', key='df')
+        no_streaks = ~(np.isin(sorted_obs["ObjID"], streakers["ObjID"][streakers["night"] == night_start]))
+        sorted_obs = sorted_obs[no_streaks]
+
     unique_objs = sorted_obs.index.unique()
 
     # work out which objects would have already been found before tonight and remove them
