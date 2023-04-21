@@ -273,7 +273,7 @@ def split_observations(obs, n_cores=28):
     return np.split(obs, indices)
 
 
-def filter_observations(df, min_obs=2, min_arc=1, max_time=90):
+def filter_observations(df, min_obs=3, min_arc=1, max_time=90):
     # create a mask based on min # of obs, min arc length, max time between shortest pair
     mask = df.groupby(["ObjID", "night"]).apply(filter_tracklets, min_obs, min_arc, max_time)
 
@@ -285,7 +285,7 @@ def filter_observations(df, min_obs=2, min_arc=1, max_time=90):
     return df
 
 
-def filter_tracklets(df, min_obs=2, min_arc=1, max_time=90):
+def filter_tracklets(df, min_obs=3, min_arc=1, max_time=90):
     init = SkyCoord(ra=df["AstRA(deg)"].iloc[0], dec=df["AstDec(deg)"].iloc[0], unit="deg")
     final = SkyCoord(ra=df["AstRA(deg)"].iloc[-1], dec=df["AstDec(deg)"].iloc[-1], unit="deg")
 
@@ -295,8 +295,8 @@ def filter_tracklets(df, min_obs=2, min_arc=1, max_time=90):
 
 
 def create_digest2_input(in_path="/data/epyc/projects/jpl_survey_sim/10yrs/detections/march_start_v2.1/S0/",
-                         out_path="neo/", night_zero=59638, start_night=0, final_night=31, timeit=False,
-                         min_obs=2, min_arc=1, max_time=90, s3m_path="../catalogues/s3m_initial.h5",
+                         out_path="neo/", night_zero=60217, start_night=0, final_night=31, timeit=False,
+                         min_obs=3, min_arc=1, max_time=90, s3m_path="../catalogues/s3m_initial.h5",
                          n_cores=28):
 
     print(f"Doing digest2 stuff for nights {start_night} to {final_night}")
@@ -483,7 +483,7 @@ def main():
                         type=str, help='Path to S3m file')
     parser.add_argument('-d', '--digest2-path', default="/data/epyc/projects/hybrid-sso-catalogs/digest2/",
                         type=str, help='Path to digest2 folder')
-    parser.add_argument('-z', '--night-zero', default=59638, type=int,
+    parser.add_argument('-z', '--night-zero', default=60217, type=int,
                         help='MJD value for the first night')
     parser.add_argument('-s', '--start-night', default=0, type=int,
                         help='First night to run through digest2')
