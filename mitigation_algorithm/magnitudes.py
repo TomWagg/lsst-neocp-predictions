@@ -144,4 +144,14 @@ def convert_colour_mags(mag, out_colour, in_colour="V", convention="LSST", aster
     else:
         raise ValueError(f"Invalid convention: {convention}")
 
-    return mag + (colours[out_colour] - colours[in_colour])
+    assert isinstance(out_colour, str), f"`out_colour` must be a str, not {type(out_colour)}"
+        
+    if isinstance(in_colour, (list, np.ndarray)):
+        out_mag = np.zeros(len(mag))
+        unique_in_colours = np.unique(in_colour)
+        for col in unique_in_colours:
+            col_mask = in_colour == col
+            out_mag[col_mask] = mag[col_mask] + (colours[out_colour] - colours[col])
+    else:
+        out_mag = mag + (colours[out_colour] - colours[in_colour])
+    return out_mag
