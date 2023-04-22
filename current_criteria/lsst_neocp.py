@@ -153,6 +153,13 @@ def create_digest2_input(in_path="/data/epyc/projects/jpl_survey_sim/10yrs/detec
                 # sort by the object and then the time
                 df = df.sort_values(["ObjID", "FieldMJD"])
 
+                # drop any S3M objects that got replaced by the hybrid catalogue
+                s3m_delete_ids = np.load("/gscratch/dirac/tomwagg/hybrid_sso_catalogue/current_criteria/s3m_delete_ids.npy",
+                                         allow_pickle=True)
+                df.set_index("ObjID", inplace=True)
+                df.drop(s3m_delete_ids, inplace=True, errors="ignore")
+                df.reset_index(inplace=True)
+
                 # mask out any bad tracklet groups
                 # if more than one core is available then split the dataframe up and parallelise
                 if n_cores > 1:
