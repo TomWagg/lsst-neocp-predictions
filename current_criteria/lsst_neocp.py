@@ -17,7 +17,7 @@ def print_time_delta(start, end, label):
     print(f"  {int(delta // 60):02d}m{int(delta % 60):02d}s - ({label})")
 
 
-f2n = np.load("f2n.npy", allow_pickle=True)
+f2n = np.load("/gscratch/dirac/tomwagg/the-sky-is-falling/current_criteria/f2n.npy", allow_pickle=True)
 
 
 def find_first_file(night_range):
@@ -154,7 +154,7 @@ def create_digest2_input(in_path="/data/epyc/projects/jpl_survey_sim/10yrs/detec
                 df = df.sort_values(["ObjID", "FieldMJD"])
 
                 # drop any S3M objects that got replaced by the hybrid catalogue
-                s3m_delete_ids = np.load("/gscratch/dirac/tomwagg/hybrid_sso_catalogue/current_criteria/s3m_delete_ids.npy",
+                s3m_delete_ids = np.load("/gscratch/dirac/tomwagg/the-sky-is-falling/current_criteria/s3m_delete_ids.npy",
                                          allow_pickle=True)
                 df.set_index("ObjID", inplace=True)
                 df.drop(s3m_delete_ids, inplace=True, errors="ignore")
@@ -313,11 +313,11 @@ def main():
 
     if args.mba_hyak:
         args.in_path = [f'/gscratch/dirac/tomwagg/simulated_obs/S1_{i:02d}/' for i in range(14)]
-        args.out_path = "/gscratch/dirac/tomwagg/hybrid_sso_catalogue/neocp/mba/"
+        args.out_path = "/gscratch/dirac/tomwagg/the-sky-is-falling/current_criteria/mba/"
 
     if args.neo_hyak:
         args.in_path = "/gscratch/dirac/tomwagg/simulated_obs/S0/"
-        args.out_path = "/gscratch/dirac/tomwagg/hybrid_sso_catalogue/neocp/neo/"
+        args.out_path = "/gscratch/dirac/tomwagg/the-sky-is-falling/current_criteria/neo/"
 
     print(f"Creating digest2 files for nights {args.start_night} to {args.final_night} in {args.out_path}")
 
