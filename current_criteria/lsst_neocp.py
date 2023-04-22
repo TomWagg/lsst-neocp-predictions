@@ -116,6 +116,13 @@ def create_digest2_input(in_path="/data/epyc/projects/jpl_survey_sim/10yrs/detec
     append = False
     nightly_obs = None
 
+    # in case there's no data, write out an empty file
+    if file is None:
+        with open(out_path + "night_{:03d}.obs".format(night), "w") as obs_file:
+            pass
+        return
+
+
     # loop until all of the nights have been read in
     while night < final_night:
         # if reading the next file
