@@ -296,7 +296,7 @@ def main():
                         help='First night to run through digest2')
     parser.add_argument('-f', '--final-night', default=31, type=int,
                         help='Last night to run through digest2')
-    parser.add_argument('-mo', '--min-obs', default=3, type=int,
+    parser.add_argument('-mo', '--min-obs', default=2, type=int,
                         help='Minimum number of observations per night')
     parser.add_argument('-ma', '--min-arc', default=1, type=int,
                         help='Minimum arc length in arcseconds')
