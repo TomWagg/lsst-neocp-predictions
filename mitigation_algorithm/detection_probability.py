@@ -29,7 +29,7 @@ sys.path.append("../current_criteria")
 from lsst_neocp import find_first_file, find_last_file
 
 
-def filter_tracklets(df, min_obs=3, min_arc=1, max_time=90):
+def filter_tracklets(df, min_obs=2, min_arc=1, max_time=90):
     init = SkyCoord(ra=df["RA_deg"].iloc[0], dec=df["Dec_deg"].iloc[0], unit="deg")
     final = SkyCoord(ra=df["RA_deg"].iloc[-1], dec=df["Dec_deg"].iloc[-1], unit="deg")
 
