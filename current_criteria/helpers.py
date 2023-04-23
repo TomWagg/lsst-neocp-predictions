@@ -10,7 +10,7 @@ def get_specific_neo_score(path, file_name):
             with open(path + file_name, "r") as f:
                 ignore_me = f.readline().rstrip() == ""
             if not ignore_me:
-                df = pd.read_fwf(path + file_name)
+                df = pd.read_csv(path + file_name, delim_whitespace=True)
                 return df["NEO"].values, df["Desig."].values
 
     return None, None
