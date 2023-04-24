@@ -60,7 +60,7 @@ def split_observations(obs, n_cores=28):
         cursor += dx
 
         # break early if we go beyond the bounds of the array
-        if cursor > len(ids) - 1:
+        if cursor > len(ids) - 2:
             indices = indices[:-1]
             break
 
