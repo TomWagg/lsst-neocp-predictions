@@ -58,6 +58,13 @@ def split_observations(obs, n_cores=28):
 
     while i < n_cores - 1:
         cursor += dx
+
+        # break early if we go beyond the bounds of the array
+        if cursor > len(ids) - 1:
+            indices = indices[:-1]
+            break
+
+        # keep incrementing until the ObjID is not the same (to avoid breaking tracklets)
         while ids[cursor] == ids[cursor + 1]:
             cursor += 1
         indices[i] = cursor
@@ -170,7 +177,10 @@ def create_digest2_input(in_path="/data/epyc/projects/jpl_survey_sim/10yrs/detec
                 # mask out any bad tracklet groups
                 # if more than one core is available then split the dataframe up and parallelise
                 if n_cores > 1:
-                    df_split = split_observations(df)
+                    df_split = split_observations(df, n_cores=n_cores)
+
+                    # update n_cores in case it is an off-by-one issue
+                    n_cores = len(df_split)
                     pool = Pool(n_cores)
                     df = pd.concat(pool.starmap(filter_observations, zip(df_split,
                                                                          repeat(min_obs, n_cores),
