@@ -5,7 +5,7 @@ import numpy as np
 
 import argparse
 
-
+NIGHT_ZERO = 60217
 f2n = np.load("f2n.npy", allow_pickle=True)
 
 def find_first_file(night_range):
@@ -51,7 +51,7 @@ def cla():
                    for i in range(14)]
 
     obs = pd.concat(all_mba_obs)
-    obs["night"] = (obs["FieldMJD"] - 0.5).astype(int) - 59638
+    obs["night"] = (obs["FieldMJD"] - 0.5).astype(int) - NIGHT_ZERO
     obs.sort_values("FieldMJD", inplace=True)
 
     observations = obs[["ObjID", "night", "FieldMJD"]]
