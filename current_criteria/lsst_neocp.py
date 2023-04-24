@@ -17,7 +17,7 @@ def print_time_delta(start, end, label):
     print(f"  {int(delta // 60):02d}m{int(delta % 60):02d}s - ({label})")
 
 
-f2n = np.load("/gscratch/dirac/tomwagg/the-sky-is-falling/current_criteria/f2n.npy", allow_pickle=True)
+f2n = np.load("/epyc/projects/neocp-predictions/current_criteria/f2n.npy", allow_pickle=True)
 
 
 def find_first_file(night_range):
