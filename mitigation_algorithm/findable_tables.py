@@ -8,7 +8,7 @@ def create_findable_obs_tables(obj_type="neo", min_nights=3, detection_window=15
     start = time.time()
 
     # get all of the observations
-    obs_dfs = [pd.read_hdf(f"../neocp/{obj_type}/filtered_visit_scores_{i:03d}.h5").sort_values("FieldMJD")[["FieldMJD", "night"]]
+    obs_dfs = [pd.read_hdf(f"../current_criteria/{obj_type}/filtered_visit_scores_{i:03d}.h5").sort_values("FieldMJD")[["FieldMJD", "night"]]
                 for i in file_ids]
     all_obs = pd.concat(obs_dfs)
     all_obs["obs_id"] = np.arange(len(all_obs))
