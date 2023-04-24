@@ -6,7 +6,7 @@ import numpy as np
 import argparse
 
 NIGHT_ZERO = 60217
-f2n = np.load("f2n.npy", allow_pickle=True)
+f2n = np.load("/epyc/projects/neocp-predictions/current_criteria/f2n.npy", allow_pickle=True)
 
 def find_first_file(night_range):
     for night in night_range:
@@ -33,7 +33,7 @@ def cla():
                         help='Start night of window')
     parser.add_argument('-w', '--window', default=15, type=int,
                         help='Length of detection window')
-    parser.add_argument('-b', '--base', default="/data/epyc/projects/jpl_survey_sim/10yrs/detections/march_start_v2.1/", type=str,
+    parser.add_argument('-b', '--base', default="/data/epyc/projects/jpl_survey_sim/10yrs/v3.0/detections/", type=str,
                         help='Path to MBA folder')
     parser.add_argument('-o', '--out', default="./", type=str, help='Path to output folder')
 
@@ -53,6 +53,13 @@ def cla():
     obs = pd.concat(all_mba_obs)
     obs["night"] = (obs["FieldMJD"] - 0.5).astype(int) - NIGHT_ZERO
     obs.sort_values("FieldMJD", inplace=True)
+
+    # drop any S3M objects that got replaced by the hybrid catalogue
+    delete_s3m_ids = np.load("/gscratch/dirac/tomwagg/the-sky-is-falling/current_criteria/delete_s3m_ids.npy",
+                                allow_pickle=True)
+    obs.set_index("ObjID", inplace=True)
+    obs.drop(delete_s3m_ids, inplace=True, errors="ignore")
+    obs.reset_index(inplace=True)
 
     observations = obs[["ObjID", "night", "FieldMJD"]]
     observations.reset_index(drop=True, inplace=True)
