@@ -3,7 +3,7 @@ import pandas as pd
 import difi
 import time
 
-def create_findable_obs_tables(obj_type="neo", min_nights=3, detection_window=15, file_ids=range(24)):
+def create_findable_obs_tables(obj_type="neo", min_nights=3, detection_window=15, file_ids=range(22)):
     print("Let the games begin...")
     start = time.time()
 
