@@ -28,6 +28,8 @@ import sys
 sys.path.append("../current_criteria")
 from lsst_neocp import find_first_file, find_last_file
 
+NIGHT_ZERO = 60217
+
 
 def filter_tracklets(df, min_obs=2, min_arc=1, max_time=90):
     init = SkyCoord(ra=df["RA_deg"].iloc[0], dec=df["Dec_deg"].iloc[0], unit="deg")
@@ -352,7 +354,7 @@ def get_reachable_schedule(rows, first_visit_times, night_list, night_lengths, f
         dec_lims = sorted([start_orbits.loc[j]["Dec_deg"], start_orbits.loc[j]["Dec_deg"] + delta_dec])
         dec_lims = [dec_lims[0] - FIELD_SIZE, dec_lims[-1] + FIELD_SIZE]
 
-        night = (start_orbits.loc[j]["mjd_utc"] - 0.5).astype(int) - 59638
+        night = (start_orbits.loc[j]["mjd_utc"] - 0.5).astype(int) - NIGHT_ZERO
 
         mask = full_schedule["night"] == night
         within_lims = np.logical_and.reduce((full_schedule[mask]["fieldRA"] > ra_lims[0],
@@ -402,7 +404,7 @@ def plot_LSST_schedule_with_orbits(schedule, reachable_schedule, ephemerides, jo
     ax.set_aspect("equal")
 
     # check that there were observations in this night
-    ephemerides["night"] = (ephemerides["mjd_utc"] - 0.5).astype(int) - 59638
+    ephemerides["night"] = (ephemerides["mjd_utc"] - 0.5).astype(int) - NIGHT_ZERO
     mask = ephemerides["night"] == night
     if not np.any(mask):
         if lims == "full_schedule":
