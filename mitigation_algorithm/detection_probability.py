@@ -1,3 +1,4 @@
+import argparse
 import astropy.units as u
 from astropy.time import Time
 from astropy.coordinates import SkyCoord
@@ -577,3 +578,40 @@ def plot_LSST_schedule_with_orbits(schedule, reachable_schedule, ephemerides, jo
         plt.show()
 
     return fig, ax
+
+
+def main():
+
+    parser = argparse.ArgumentParser(description='Calculate self-follow-up probability for a night of obs')
+    parser.add_argument('-i', '--in-path',
+                        default="/epyc/projects/neocp-predictions/current_criteria/",
+                        type=str, help='Path to the folder containing folders of filtered visits')
+    parser.add_argument('-o', '--out-path', default="/epyc/projects/neocp-predictions/mitigation_algorithm/latest_runs/", type=str,
+                        help='Path to folder in which to place output')
+    parser.add_argument('-f', '--fov-map-path', default="/epyc/ssd/users/tomwagg/rubin_sim_data/maf/fov_map.npz", type=str,
+                        help='Path to fov_map file')
+    parser.add_argument('-s', '--start-night', default=0, type=int,
+                        help='First night to run')
+    parser.add_argument('-t', '--type', default='neo', type=int,
+                        help='Which object type to run')
+    parser.add_argument('-mn', '--min-nights', default=3, type=int,
+                        help='Minimum number of nights to get detection')
+    parser.add_argument('-w', '--detection-window', default=15, type=int,
+                        help='Length of detection window in nights')
+    parser.add_argument('-p', '--pool-size', default=28, type=int,
+                        help='How many CPUs to use')
+    parser.add_argument('-S', '--save', action="store_true",
+                        help="Whether to save results")
+    parser.add_argument('-t', '--timeit', action="store_true",
+                        help="Whether to time the code and print it out")
+    args = parser.parse_args()
+
+    get_detection_probabilities(night_start=args.start_night, obj_type=args.type,
+                                detection_window=args.detection_window, min_nights=args.min_nights,
+                                schedule_type="predicted", pool_size=args.pool_size, in_path=args.in_path,
+                                out_path=args.out_path, fov_map_path=args.fov_map_path,
+                                save_results=args.save_results)
+
+
+if __name__ == "__main__":
+    main()
