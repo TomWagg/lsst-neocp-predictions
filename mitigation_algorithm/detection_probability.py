@@ -600,7 +600,7 @@ def main():
                         help='Length of detection window in nights')
     parser.add_argument('-p', '--pool-size', default=28, type=int,
                         help='How many CPUs to use')
-    parser.add_argument('-S', '--save', action="store_true",
+    parser.add_argument('-S', '--save-results', action="store_true",
                         help="Whether to save results")
     args = parser.parse_args()
 
