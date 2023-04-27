@@ -95,7 +95,7 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
 
     # get the first/last visit from each night
     night_transition = full_schedule["night"] != full_schedule["previousNight"]
-    first_visit_times = full_schedule[night_transition]["observationStartMJD"].values
+    first_visit_times = full_schedule[night_transition]["observationStartMJD"].values.astype(float)
 
     last_times_ind = np.array(list(full_schedule[night_transition].index[1:]) + [len(full_schedule)]) - 1
     last_visit_times = full_schedule.loc[last_times_ind]["observationStartMJD"].values
