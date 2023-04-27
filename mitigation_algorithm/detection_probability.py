@@ -230,7 +230,7 @@ def probability_from_id(hex_id, sorted_obs, distances, radial_velocities, prior_
                                             distances=distances,
                                             radial_velocities=radial_velocities,
                                             apparent_mag=apparent_mag,
-                                            eph_times=Time(reachable_schedule["observationStartMJD"].values,
+                                            eph_times=Time(reachable_schedule["observationStartMJD"].values.astype(float),
                                                             format="mjd"),
                                             only_neos=True,
                                             num_jobs=1)
