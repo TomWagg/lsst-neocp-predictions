@@ -592,7 +592,7 @@ def main():
                         help='Path to fov_map file')
     parser.add_argument('-s', '--start-night', default=0, type=int,
                         help='First night to run')
-    parser.add_argument('-t', '--type', default='neo', type=int,
+    parser.add_argument('-t', '--type', default='neo', type=str,
                         help='Which object type to run')
     parser.add_argument('-mn', '--min-nights', default=3, type=int,
                         help='Minimum number of nights to get detection')
@@ -602,8 +602,6 @@ def main():
                         help='How many CPUs to use')
     parser.add_argument('-S', '--save', action="store_true",
                         help="Whether to save results")
-    parser.add_argument('-t', '--timeit', action="store_true",
-                        help="Whether to time the code and print it out")
     args = parser.parse_args()
 
     get_detection_probabilities(night_start=args.start_night, obj_type=args.type,

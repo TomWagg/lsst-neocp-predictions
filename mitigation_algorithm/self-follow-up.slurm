@@ -14,7 +14,7 @@
 #SBATCH --export=all
 
 source ~/.bashrc
-conda activate /gscratch/dirac/tomwagg/neocp-fixed
+conda activate neocp-fixed
 
 SCRIPT_PATH=/gscratch/dirac/tomwagg/the-sky-is-falling/mitigation_algorithm/detection_probability.py
 IN_PATH=/gscratch/dirac/tomwagg/the-sky-is-falling/current_criteria
