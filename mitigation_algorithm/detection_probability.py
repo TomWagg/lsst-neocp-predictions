@@ -215,6 +215,10 @@ def probability_from_id(hex_id, sorted_obs, distances, radial_velocities, prior_
     rows = sorted_obs.loc[hex_id]
     reachable_schedule = get_reachable_schedule(rows, first_visit_times, night_list,
                                                 night_lengths, full_schedule)
+    
+    # if nothing is reachable then instantly return 0
+    if len(reachable_schedule) == 0:
+        return 0.0
 
     v_mags = [convert_colour_mags(r["MaginFilter"],
                                   in_colour=r["filter"], out_colour="V") for _, r in rows.iterrows()]
