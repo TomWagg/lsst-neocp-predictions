@@ -1,3 +1,4 @@
+import argparse
 import astropy.units as u
 from astropy.time import Time
 from astropy.coordinates import SkyCoord
@@ -41,7 +42,11 @@ def filter_tracklets(df, min_obs=2, min_arc=1, max_time=90):
 
 
 def get_detection_probabilities(night_start, obj_type="neo", detection_window=15, min_nights=3,
-                                schedule_type="predicted", pool_size=48, save_results=True):
+                                schedule_type="predicted", pool_size=48,
+                                in_path="/epyc/projects/neocp-predictions/current_criteria/",
+                                out_path="/epyc/projects/neocp-predictions/mitigation_algorithm/latest_runs/",
+                                fov_map_path="/epyc/ssd/users/tomwagg/rubin_sim_data/maf/fov_map.npz",
+                                save_results=True):
     """Get the probability that LSST will detect each object that was observed in a particular night
 
     Parameters
@@ -66,9 +71,8 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
     unique_objs : `list`
         List of unique hex ids that have digest2 > 65 that were observed on `night_start`
     """
-    start = time.time()
     lap = time.time()
-    path = f"/epyc/projects/neocp-predictions/current_criteria/{obj_type}/"
+    path = os.path.join(in_path, obj_type)
 
     # create a list of nights in the detection window and get schedule for them
     night_list = list(range(night_start, night_start + detection_window))
@@ -98,7 +102,6 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
     first_visit_times = full_schedule[night_transition]["observationStartMJD"].values.astype(float)
 
     last_times_ind = np.array(list(full_schedule[night_transition].index[1:]) + [len(full_schedule)]) - 1
-    last_visit_times = full_schedule.loc[last_times_ind]["observationStartMJD"].values
 
     print(f"[{time.time() - lap:1.1f}s] Schedule is loaded in and ready!")
     lap = time.time()
@@ -165,19 +168,21 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
                                  prior_obs_nights=prior_obs_nights,
                                  first_visit_times=first_visit_times, full_schedule=full_schedule,
                                  night_lengths=night_lengths, night_list=night_list,
-                                 detection_window=detection_window, min_nights=min_nights), unique_objs)
+                                 detection_window=detection_window, min_nights=min_nights,
+                                 fov_map_path=fov_map_path), unique_objs)
 
     print(f"Finished with the pool! [{time.time() - lap:1.1f}s]")
 
     if save_results:
-        np.save(f"latest_runs/{obj_type}_night{night_start}_probs.npy", (probs, unique_objs))
+        np.save(os.path.join(out_path, f"{obj_type}_night{night_start}_probs.npy"), (probs, unique_objs))
 
     return probs, unique_objs
 
 
 def probability_from_id(hex_id, sorted_obs, distances, radial_velocities, prior_obs_nights, first_visit_times,
                         full_schedule, night_lengths, night_list, detection_window=15, min_nights=3,
-                        ret_joined_table=False, verbose=False):
+                        ret_joined_table=False, verbose=False,
+                        fov_map_path="/epyc/ssd/users/tomwagg/rubin_sim_data/maf/fov_map.npz"):
     """Get the probability of an object with a particular ID of being detected by LSST alone given
     observations on a single night.
 
@@ -260,8 +265,7 @@ def probability_from_id(hex_id, sorted_obs, distances, radial_velocities, prior_
     bright_enough = joined_table["mag_in_filter"] < joined_table["fiveSigmaDepth"]
 
     # next we want only objects that are in the camera footprint
-    camera = LsstCameraFootprint(footprint_file=os.path.join("/epyc/ssd/users/tomwagg/rubin_sim_data/",
-                                                             "maf", "fov_map.npz"))
+    camera = LsstCameraFootprint(footprint_file=fov_map_path)
     in_footprint = np.repeat(False, len(joined_table))
 
     # loop over each of the unique field times
@@ -574,3 +578,38 @@ def plot_LSST_schedule_with_orbits(schedule, reachable_schedule, ephemerides, jo
         plt.show()
 
     return fig, ax
+
+
+def main():
+
+    parser = argparse.ArgumentParser(description='Calculate self-follow-up probability for a night of obs')
+    parser.add_argument('-i', '--in-path',
+                        default="/epyc/projects/neocp-predictions/current_criteria/",
+                        type=str, help='Path to the folder containing folders of filtered visits')
+    parser.add_argument('-o', '--out-path', default="/epyc/projects/neocp-predictions/mitigation_algorithm/latest_runs/", type=str,
+                        help='Path to folder in which to place output')
+    parser.add_argument('-f', '--fov-map-path', default="/epyc/ssd/users/tomwagg/rubin_sim_data/maf/fov_map.npz", type=str,
+                        help='Path to fov_map file')
+    parser.add_argument('-s', '--start-night', default=0, type=int,
+                        help='First night to run')
+    parser.add_argument('-t', '--type', default='neo', type=str,
+                        help='Which object type to run')
+    parser.add_argument('-mn', '--min-nights', default=3, type=int,
+                        help='Minimum number of nights to get detection')
+    parser.add_argument('-w', '--detection-window', default=15, type=int,
+                        help='Length of detection window in nights')
+    parser.add_argument('-p', '--pool-size', default=28, type=int,
+                        help='How many CPUs to use')
+    parser.add_argument('-S', '--save-results', action="store_true",
+                        help="Whether to save results")
+    args = parser.parse_args()
+
+    get_detection_probabilities(night_start=args.start_night, obj_type=args.type,
+                                detection_window=args.detection_window, min_nights=args.min_nights,
+                                schedule_type="predicted", pool_size=args.pool_size, in_path=args.in_path,
+                                out_path=args.out_path, fov_map_path=args.fov_map_path,
+                                save_results=args.save_results)
+
+
+if __name__ == "__main__":
+    main()
