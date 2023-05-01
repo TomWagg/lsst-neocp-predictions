@@ -99,7 +99,11 @@ def variant_orbit_ephemerides(ra, dec, ra_end, dec_end, delta_t, obstime, distan
     size = len(distances) * len(radial_velocities)
 
     # use astropy to get information based on a site name
-    obs_loc = EarthLocation.of_site(location)
+    if location == "Gemini South":
+        # avoid using the internet for hyak if it is just Gemini South
+        obs_loc = EarthLocation(1820193.06844603, -5208343.03427567, -3194842.50048343, unit="m")
+    else:
+        obs_loc = EarthLocation.of_site(location)
 
     # need a list with units rather than list of things each with units
     obsgeoloc = [x.to(u.m).value for x in obs_loc.geocentric] * u.m
