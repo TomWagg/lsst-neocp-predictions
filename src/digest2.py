@@ -1,20 +1,22 @@
 import pandas as pd
 from astropy.coordinates import Angle
 from astropy.time import Time
-from os.path import isfile
+from os.path import isfile, join
 
 def create_digest2_input(night,
                          in_path="/epyc/projects/neocp-predictions/output/synthetic_obs/",
                          out_path="/epyc/projects/neocp-predictions/output/digest2_input/"):
 
+    file_path = join(in_path, f"filtered_night_{night:04d}.h5")
+
     # check if file exists, in case there's no data, write out an empty file
-    if not isfile(in_path + "night_{:04d}.h5".format(night)):
+    if not isfile(file_path):
         with open(out_path + "night_{:04d}.obs".format(night), "w") as obs_file:
             pass
         return
     
     # read in the data
-    nightly_obs = pd.read_hdf(in_path + "night_{:04d}.h5".format(night), key="df")
+    nightly_obs = pd.read_hdf(file_path, key="df")
     
     if isfile(out_path + "night_{:04d}.obs".format(night)):
         print(f"Skipping night {night} because it already exists")
@@ -37,7 +39,7 @@ def create_digest2_input(night,
 
         # convert time to HH MM DD.ddddd format
         t = datetimes[i]
-        lines[i] += "{:4.0f} {:02.0f} {:08.5f} ".format(t.year, t.month, t.day + nightly_obs.iloc[i]["FieldMJD"] % 1.0)
+        lines[i] += "{:4.0f} {:02.0f} {:08.5f} ".format(t.year, t.month, t.day + nightly_obs.iloc[i]["FieldMJD_TAI"] % 1.0)
 
         # convert RA to HH MM SS.ddd
         lines[i] += "{:02.0f} {:02.0f} {:06.3f}".format(ra_degrees.h[i], ra_degrees.m[i], ra_degrees.s[i])
@@ -49,11 +51,11 @@ def create_digest2_input(night,
         lines[i] += " " * 9
 
         # add the magnitude and filter (right aligned)
-        lines[i] += "{:04.1f}  {}".format(nightly_obs.iloc[i]["MaginFilter"], nightly_obs.iloc[i]["filter"])
+        lines[i] += "{:04.1f}  {}".format(nightly_obs.iloc[i]["observedTrailedSourceMag"], nightly_obs.iloc[i]["optFilter"])
 
         # add some more spaces and an observatory code
         lines[i] += " " * 5 + "I11" + "\n"
 
     # write that to a file
-    with open(out_path + "night_{:03d}.obs".format(night), "a" if append else "w") as obs_file:
+    with open(out_path + "night_{:03d}.obs".format(night), "w") as obs_file:
         obs_file.writelines(lines)
