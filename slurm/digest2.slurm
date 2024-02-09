@@ -16,7 +16,7 @@ source ~/.bashrc
 conda activate /gscratch/dirac/tomwagg/anaconda3/envs/neocp-fixed
 
 SCRIPT_PATH=/gscratch/dirac/tomwagg/neocp-predictions/pipeline/run_digest2.py
-IN_PATH=/gscratch/dirac/tomwagg/neocp-predictions/output/digest2_input/
+IN_PATH=/gscratch/dirac/tomwagg/neocp-predictions/output/synthetic_obs/
 OUT_PATH=/gscratch/dirac/tomwagg/neocp-predictions/output/digest2_output/
 DIGEST2_PATH=/gscratch/dirac/tomwagg/hybrid_sso_catalogue/digest2/
 

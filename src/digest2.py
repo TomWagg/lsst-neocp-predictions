@@ -5,7 +5,7 @@ from os.path import isfile, join
 
 def create_digest2_input(night,
                          in_path="/epyc/projects/neocp-predictions/output/synthetic_obs/",
-                         out_path="/epyc/projects/neocp-predictions/output/digest2_input/"):
+                         out_path="/epyc/projects/neocp-predictions/output/digest2_output/"):
 
     file_path = join(in_path, f"filtered_night_{night:04d}.h5")
 

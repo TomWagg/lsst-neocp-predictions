@@ -16,9 +16,8 @@ def create_bash_script(night, out_path="neo/",
 
 def main():
     parser = argparse.ArgumentParser(description='Run digest2 on LSST mock observations')
-    parser.add_argument('-i', '--in-path',
-                        default="/data/epyc/projects/jpl_survey_sim/10yrs/detections/march_start_v2.1/S0/",
-                        type=str, help='Path to the folder containing mock observations')
+    parser.add_argument('-i', '--in-path', default="", type=str,
+                        help='Path to the folder containing mock observations')
     parser.add_argument('-o', '--out-path', default="neo/", type=str,
                         help='Path to folder in which to place output')
     parser.add_argument('-d', '--digest2-path', default="/data/epyc/projects/hybrid-sso-catalogs/digest2/",
@@ -33,7 +32,7 @@ def main():
 
     digest2.create_digest2_input(night=args.night, in_path=args.in_path, out_path=args.out_path)
 
-    script = create_bash_script(out_path=args.out_path, night=args.night,
+    script = create_bash_script(in_path=args.in_path, out_path=args.out_path, night=args.night,
                                 digest2_path=args.digest2_path, cpu_count=args.cpu_count)
     subprocess.call(script, shell=True)
     print("Hurrah!")
