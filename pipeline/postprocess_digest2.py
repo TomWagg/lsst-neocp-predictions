@@ -6,7 +6,11 @@ from multiprocessing import Pool
 import os
 
 def create_final_file(night, path="/epyc/projects/neocp-predictions/output/"):
-    print(f"Starting night {night}")
+    if not os.path.isfile(os.path.join(path, f"digest2_output/night_{night:04d}.filtered.dat")):
+        print("No digest2 file found for night {night:04d}")
+        return
+    else:
+        print(f"Processing night {night:04d}")
     
     digest2_df = pd.read_csv(os.path.join(path, f"digest2_output/night_{night:04d}.filtered.dat"),
                                 delim_whitespace=True).dropna()
