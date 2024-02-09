@@ -32,7 +32,7 @@ def main():
 
     digest2.create_digest2_input(night=args.night, in_path=args.in_path, out_path=args.out_path)
 
-    script = create_bash_script(in_path=args.in_path, out_path=args.out_path, night=args.night,
+    script = create_bash_script(out_path=args.out_path, night=args.night,
                                 digest2_path=args.digest2_path, cpu_count=args.cpu_count)
     subprocess.call(script, shell=True)
     print("Hurrah!")
