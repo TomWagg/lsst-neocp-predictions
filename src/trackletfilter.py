@@ -5,6 +5,16 @@ DEG_TO_RAD = np.pi / 180
 DEG_TO_AS = 3600
 DAY_TO_MIN = 1440
 
+def tracklet_speed(df):
+    """Calculate the speed of a tracklet in degrees per day"""
+    first, last = df.iloc[0], df.iloc[-1]
+    sep = angular_separation(df["AstRA(deg)"].iloc[0] * DEG_TO_RAD,
+                             df["AstDec(deg)"].iloc[0] * DEG_TO_RAD,
+                             df["AstRA(deg)"].iloc[-1] * DEG_TO_RAD,
+                             df["AstDec(deg)"].iloc[-1] * DEG_TO_RAD) / DEG_TO_RAD
+    dt = (last["FieldMJD_TAI"] - first["FieldMJD_TAI"])
+    return sep / dt
+
 def ensure_min_obs(df, min_obs=3):
     """Ensure that there are at least `min_obs` observations for each object in the dataframe"""
     # calculate the number of observations for each object
