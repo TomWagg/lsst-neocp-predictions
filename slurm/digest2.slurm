@@ -1,3 +1,5 @@
+#SBATCH --job-name=digest2
+#SBATCH --account=astro-ckpt
 #SBATCH --partition=ckpt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=28
@@ -10,7 +12,7 @@
 #SBATCH --export=all
 
 source ~/.bashrc
-conda activate /gscratch/dirac/tomwagg/conda_envs/neocp
+conda activate /gscratch/dirac/tomwagg/anaconda3/envs/neocp-fixed
 
 SCRIPT_PATH=/gscratch/dirac/tomwagg/neocp-predictions/pipeline/run_digest2.py
 IN_PATH=/gscratch/dirac/tomwagg/neocp-predictions/output/digest2_input/
