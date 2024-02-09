@@ -1,0 +1,20 @@
+#SBATCH --partition=ckpt
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=28
+#SBATCH --time=6:00:00
+#SBATCH --mem=100G
+#SBATCH -o /gscratch/dirac/tomwagg/slurm/digest_logs_%a_%A.out
+#SBATCH --chdir=/gscratch/dirac/tomwagg/the-sky-is-falling/current_criteria
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=tomwagg@uw.edu
+#SBATCH --export=all
+
+source ~/.bashrc
+conda activate /gscratch/dirac/tomwagg/conda_envs/neocp
+
+SCRIPT_PATH=/gscratch/dirac/tomwagg/neocp-predictions/pipeline/run_digest2.py
+IN_PATH=/gscratch/dirac/tomwagg/neocp-predictions/output/digest2_input/
+OUT_PATH=/gscratch/dirac/tomwagg/neocp-predictions/output/digest2_output/
+DIGEST2_PATH=/gscratch/dirac/tomwagg/hybrid_sso_catalogue/digest2/
+
+python $SCRIPT_PATH -i $IN_PATH -o $OUT_PATH -d $DIGEST2_PATH -c 28 -n $SLURM_ARRAY_TASK_ID
