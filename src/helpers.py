@@ -28,5 +28,5 @@ def get_neo_scores(path, night=None):
                 neo_scores = np.concatenate((neo_scores, neo))
                 ids = np.concatenate((ids, ID))
     else:
-        neo_scores, ids = get_specific_neo_score(path, f"night_{night:03d}.filtered.dat")
+        neo_scores, ids = get_specific_neo_score(path, f"night_{night:04d}.filtered.dat")
     return neo_scores, ids

@@ -6,7 +6,7 @@ import digest2
 
 def create_bash_script(night, out_path="neo/",
                        digest2_path="/data/epyc/projects/hybrid-sso-catalogs/digest2/", cpu_count=32):
-    bash = f"NIGHT={night:03d}\n"
+    bash = f"NIGHT={night:04d}\n"
     bash += 'echo "Now running night $NIGHT through digest2..."\n'
     bash += f"time {digest2_path}digest2 -p {digest2_path} -c {digest2_path}MPC.config --cpu {cpu_count}"
     bash += f" {out_path}night_$NIGHT.obs > {out_path}night_$NIGHT.dat" + "\n"

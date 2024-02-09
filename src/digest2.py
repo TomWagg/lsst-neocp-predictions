@@ -57,5 +57,5 @@ def create_digest2_input(night,
         lines[i] += " " * 5 + "I11" + "\n"
 
     # write that to a file
-    with open(out_path + "night_{:03d}.obs".format(night), "w") as obs_file:
+    with open(out_path + "night_{:04d}.obs".format(night), "w") as obs_file:
         obs_file.writelines(lines)
