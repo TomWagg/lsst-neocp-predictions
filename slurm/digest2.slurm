@@ -1,3 +1,4 @@
+#!/bin/bash
 #SBATCH --job-name=digest2
 #SBATCH --account=astro-ckpt
 #SBATCH --partition=ckpt
