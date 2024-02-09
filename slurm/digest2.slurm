@@ -4,10 +4,10 @@
 #SBATCH --partition=ckpt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=28
-#SBATCH --time=6:00:00
-#SBATCH --mem=100G
-#SBATCH -o /gscratch/dirac/tomwagg/slurm/digest_logs_%a_%A.out
-#SBATCH --chdir=/gscratch/dirac/tomwagg/the-sky-is-falling/current_criteria
+#SBATCH --time=0:10:00
+#SBATCH --mem=10G
+#SBATCH -o /gscratch/dirac/tomwagg/neocp-predictions/slurm/digest_logs_%a_%A.out
+#SBATCH --chdir=/gscratch/dirac/tomwagg/neocp-predictions/pipeline/
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=tomwagg@uw.edu
 #SBATCH --export=all
