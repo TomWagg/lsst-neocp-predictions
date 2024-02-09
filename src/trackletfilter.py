@@ -5,42 +5,6 @@ DEG_TO_RAD = np.pi / 180
 DEG_TO_AS = 3600
 DAY_TO_MIN = 1440
 
-def split_observations(obs, n_cores=28):
-    """Split observations over many cores but keep groups of tracklets together so that they get masked
-    correctly!
-
-    Parameters
-    ----------
-    obs : `pandas.DataFrame`
-        Observation table
-    n_cores : `int`, optional
-        Number of cores to split over, by default 28
-
-    Returns
-    -------
-    split_obs : `list`
-        List of dataframes with length `n_cores` and each with size approximately `len(obs) / n_cores`
-    """
-    indices = np.array([None for _ in range(n_cores - 1)])
-    i, cursor, dx = 0, 0, len(obs) // n_cores
-    ids = obs["ObjID"].values
-
-    while i < n_cores - 1:
-        cursor += dx
-
-        # break early if we go beyond the bounds of the array
-        if cursor > len(ids) - 2:
-            indices = indices[:-1]
-            break
-
-        # keep incrementing until the ObjID is not the same (to avoid breaking tracklets)
-        while ids[cursor] == ids[cursor + 1]:
-            cursor += 1
-        indices[i] = cursor
-        i += 1
-
-    return np.split(obs, indices)
-
 def ensure_min_obs(df, min_obs=3):
     """Ensure that there are at least `min_obs` observations for each object in the dataframe"""
     # calculate the number of observations for each object
