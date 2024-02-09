@@ -4,13 +4,18 @@ sys.path.append("/epyc/projects/neocp-predictions/src/")
 import trackletfilter
 from multiprocessing import Pool
 import os
+import subprocess
 
 def create_final_file(night, path="/epyc/projects/neocp-predictions/output/"):
-    if not os.path.isfile(os.path.join(path, f"digest2_output/night_{night:04d}.filtered.dat")):
+    if not os.path.isfile(os.path.join(path, f"digest2_output/night_{night:04d}.dat")):
         print("No digest2 file found for night {night:04d}")
         return
-    else:
-        print(f"Processing night {night:04d}")
+    elif not os.path.isfile(os.path.join(path, f"digest2_output/night_{night:04d}.dat")):
+        out_path = os.path.join(path, "digest2_output/")
+        b = f"grep -a -v tracklet {out_path}night_{night:04d}.dat > {out_path}night_{night:04d}.filtered.dat"
+        subprocess.call(b, shell=True)
+
+    print(f"Processing night {night:04d}")
     
     digest2_df = pd.read_csv(os.path.join(path, f"digest2_output/night_{night:04d}.filtered.dat"),
                                 delim_whitespace=True).dropna()
