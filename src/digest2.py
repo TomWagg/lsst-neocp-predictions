@@ -3,15 +3,20 @@ from astropy.coordinates import Angle
 from astropy.time import Time
 from os.path import isfile, join
 
-def create_digest2_input(night,
+def create_digest2_input(night=None, file_name=None,
                          in_path="/epyc/projects/neocp-predictions/output/synthetic_obs/",
                          out_path="/epyc/projects/neocp-predictions/output/digest2_output/"):
 
-    file_path = join(in_path, f"filtered_night_{night:04d}.h5")
+    if file_name is None:
+        file_name = f"filtered_night_{night:04d}.h5"
+        out_file_name = f"night_{night:04d}.obs"
+    else:
+        out_file_name = file_name.replace(".h5", ".obs")
+    file_path = join(in_path, file_name)
 
     # check if file exists, in case there's no data, write out an empty file
     if not isfile(file_path):
-        with open(out_path + "night_{:04d}.obs".format(night), "w") as obs_file:
+        with open(join(out_path, out_file_name), "w") as obs_file:
             pass
         return
     
@@ -57,5 +62,5 @@ def create_digest2_input(night,
         lines[i] += " " * 5 + "I11" + "\n"
 
     # write that to a file
-    with open(out_path + "night_{:04d}.obs".format(night), "w") as obs_file:
+    with open(join(out_path, out_file_name)) as obs_file:
         obs_file.writelines(lines)
