@@ -5,7 +5,7 @@ from os.path import isfile, join
 
 def create_digest2_input(night=None, file_name=None,
                          in_path="/epyc/projects/neocp-predictions/output/synthetic_obs/",
-                         out_path="/epyc/projects/neocp-predictions/output/digest2_output/"):
+                         out_path="/epyc/projects/neocp-predictions/output/digest2_input/"):
 
     if file_name is None:
         file_name = f"filtered_night_{night:04d}.h5"
@@ -62,5 +62,5 @@ def create_digest2_input(night=None, file_name=None,
         lines[i] += " " * 5 + "I11" + "\n"
 
     # write that to a file
-    with open(join(out_path, out_file_name)) as obs_file:
+    with open(join(out_path, out_file_name), "w") as obs_file:
         obs_file.writelines(lines)
