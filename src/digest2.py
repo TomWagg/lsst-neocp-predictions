@@ -23,8 +23,8 @@ def create_digest2_input(night=None, file_name=None,
     # read in the data
     nightly_obs = pd.read_hdf(file_path, key="df")
     
-    if isfile(out_path + "night_{:04d}.obs".format(night)):
-        print(f"Skipping night {night} because it already exists")
+    if isfile(join(out_path, out_file_name)):
+        print(f"Skipping {file_name} because it already exists")
         return
 
     # convert RA and Dec to hourangles and MJD to regular dates
@@ -34,7 +34,7 @@ def create_digest2_input(night=None, file_name=None,
 
     # match to 80 column format: https://www.minorplanetcenter.net/iau/info/OpticalObs.html
     # each line stars with 5 spaces
-    lines = [" " * 5 for i in range(len(nightly_obs))]
+    lines = [" " * 5 for _ in range(len(nightly_obs))]
     for i in range(len(nightly_obs)):
         # convert ID to its hex representation
         lines[i] += nightly_obs.iloc[i]["hex_id"]
