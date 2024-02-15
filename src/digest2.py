@@ -29,7 +29,7 @@ def create_digest2_input(night=None, file_name=None,
 
     # convert RA and Dec to hourangles and MJD to regular dates
     ra_degrees = Angle(nightly_obs["AstRA(deg)"], unit="deg").hms
-    dec_degrees = Angle(nightly_obs["AstDec(deg)"], unit="deg").hms
+    dec_degrees = Angle(nightly_obs["AstDec(deg)"], unit="deg").dms
     datetimes = Time(nightly_obs["FieldMJD_TAI"], format="mjd").datetime
 
     # match to 80 column format: https://www.minorplanetcenter.net/iau/info/OpticalObs.html
@@ -49,8 +49,8 @@ def create_digest2_input(night=None, file_name=None,
         # convert RA to HH MM SS.ddd
         lines[i] += "{:02.0f} {:02.0f} {:06.3f}".format(ra_degrees.h[i], ra_degrees.m[i], ra_degrees.s[i])
 
-        # convert Dec to sHH MM SS.dd
-        lines[i] += "{:+03.0f} {:02.0f} {:05.2f}".format(dec_degrees.h[i], abs(dec_degrees.m[i]), abs(dec_degrees.s[i]))
+        # convert Dec to sDD MM SS.dd
+        lines[i] += f"{dec_degrees.d[i]:+03.0f} {abs(dec_degrees.m[i]):02.0f} {abs(dec_degrees.s[i]):05.2f}"
 
         # leave some blank columns
         lines[i] += " " * 9
