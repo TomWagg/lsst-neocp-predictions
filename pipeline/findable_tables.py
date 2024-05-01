@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import difi
 import time
+import os
 
 def create_findable_obs_tables(min_nights=3, detection_window=15, nights=range(366),
                                out_path="../output/findable_obs_year_1.h5"):
@@ -9,8 +10,13 @@ def create_findable_obs_tables(min_nights=3, detection_window=15, nights=range(3
     start = time.time()
 
     # get all of the observations
-    obs_dfs = [pd.read_hdf(f"../output/synthetic_obs/filtered_night_{night:04d}_with_scores_trimmed.h5")[["FieldMJD_TAI", "night", "hex_id"]].sort_values("FieldMJD_TAI")
-                for night in nights]
+    obs_dfs = np.array([None for _ in nights])
+    for i, night in enumerate(nights):
+        file_path = f"../output/synthetic_obs/filtered_night_{night:04d}_with_scores_trimmed.h5"
+        if os.path.exists(file_path):
+            obs_dfs[i] = pd.read_hdf(file_path)[["FieldMJD_TAI", "night", "hex_id"]].sort_values("FieldMJD_TAI")
+
+    obs_dfs = obs_dfs[obs_dfs != None]
     all_obs = pd.concat(obs_dfs)
     all_obs["obs_id"] = np.arange(len(all_obs))
     all_obs.reset_index(inplace=True)
