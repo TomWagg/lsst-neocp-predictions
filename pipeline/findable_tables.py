@@ -3,13 +3,14 @@ import pandas as pd
 import difi
 import time
 
-def create_findable_obs_tables(obj_type="neo", min_nights=3, detection_window=15, file_ids=range(22)):
+def create_findable_obs_tables(min_nights=3, detection_window=15, nights=range(366),
+                               out_path="../output/findable_obs_year_1.h5"):
     print("Let the games begin...")
     start = time.time()
 
     # get all of the observations
-    obs_dfs = [pd.read_hdf(f"../current_criteria/{obj_type}/filtered_visit_scores_{i:03d}.h5").sort_values("FieldMJD")[["FieldMJD", "night"]]
-                for i in file_ids]
+    obs_dfs = [pd.read_hdf(f"../output/synthetic_obs/filtered_night_{night:04d}_with_scores.h5_trimmed")[["FieldMJD_TAI", "night", "hex_id"]].sort_values("FieldMJD_TAI")
+                for night in nights]
     all_obs = pd.concat(obs_dfs)
     all_obs["obs_id"] = np.arange(len(all_obs))
     all_obs.reset_index(inplace=True)
@@ -22,7 +23,7 @@ def create_findable_obs_tables(obj_type="neo", min_nights=3, detection_window=15
         observations=all_obs,
         classes=None,
         metric="nightly_linkages",
-        column_mapping={"obs_id": "obs_id", "truth": "hex_id", "night": "night", "time": "FieldMJD"}
+        column_mapping={"obs_id": "obs_id", "truth": "hex_id", "night": "night", "time": "FieldMJD_TAI"}
     )
 
     print(f"Difi done, {time.time() - obs_done:1.1f}s elapsed")
@@ -47,7 +48,7 @@ def create_findable_obs_tables(obj_type="neo", min_nights=3, detection_window=15
             findable_obs.loc[ind, "actually_findable"] = False
 
     findable_obs = findable_obs[findable_obs["actually_findable"]].set_index("hex_id")["night_detected"]
-    findable_obs.to_hdf(f"findable_obs_{obj_type}.h5", key="df")
+    findable_obs.to_hdf(out_path, key="df")
 
     print(f"All done! {time.time() - difi_done:1.1f}s elapsed since difi")
     print(f"\nIt took {time.time() - start:1.1f}s in total.")
@@ -56,5 +57,4 @@ def create_findable_obs_tables(obj_type="neo", min_nights=3, detection_window=15
 
 
 if __name__ == "__main__":
-    create_findable_obs_tables(obj_type="neo")
-    create_findable_obs_tables(obj_type="mba")
+    create_findable_obs_tables()
