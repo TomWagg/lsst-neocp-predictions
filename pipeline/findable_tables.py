@@ -9,7 +9,7 @@ def create_findable_obs_tables(min_nights=3, detection_window=15, nights=range(3
     start = time.time()
 
     # get all of the observations
-    obs_dfs = [pd.read_hdf(f"../output/synthetic_obs/filtered_night_{night:04d}_with_scores.h5_trimmed")[["FieldMJD_TAI", "night", "hex_id"]].sort_values("FieldMJD_TAI")
+    obs_dfs = [pd.read_hdf(f"../output/synthetic_obs/filtered_night_{night:04d}_with_scores_trimmed.h5")[["FieldMJD_TAI", "night", "hex_id"]].sort_values("FieldMJD_TAI")
                 for night in nights]
     all_obs = pd.concat(obs_dfs)
     all_obs["obs_id"] = np.arange(len(all_obs))
