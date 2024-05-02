@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import os
 from multiprocessing import Pool
@@ -19,6 +20,7 @@ def prune_night_file(night, path="/epyc/projects/neocp-predictions/output/synthe
     print(night, "done")
 
 if __name__ == "__main__":
-    nights = range(366)
+    # nights = range(366)
+    nights = np.load("/epyc/projects/neocp-predictions/output/ten_year_target_nights.npy", allow_pickle=True)
     with Pool(30) as p:
         p.map(prune_night_file, nights)
