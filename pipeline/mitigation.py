@@ -101,7 +101,7 @@ def get_detection_probabilities(night_start, detection_window=15, min_nights=3,
     lap = time.time()
 
     obs_dfs = [pd.read_hdf(os.path.join(in_path, f"filtered_night_{i:04d}_with_scores_trimmed.h5")).sort_values("FieldMJD_TAI")
-                for i in range(night_start - detection_window + 1, night_list[-1])]
+                for i in range(max(night_start - detection_window + 1, 0), night_list[-1])]
     all_obs = pd.concat(obs_dfs)
 
     print(f"[{time.time() - lap:1.1f}s] Observation files read in")
