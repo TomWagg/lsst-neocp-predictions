@@ -40,7 +40,7 @@ def get_LSST_schedule(night, night_zero=60796, schedule_type="predicted",
     """
 
     if schedule_type == "actual":
-        con = sqlite3.connect('/epyc/projects/neocp-predictions/output/baseline_v3.3_10yrs.db')
+        con = sqlite3.connect('/epyc/projects/neocp-predictions/output/baseline_v3.3_1yrs.db')
         cur = con.cursor()
 
         if isinstance(night, int):
