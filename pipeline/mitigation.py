@@ -321,9 +321,9 @@ def get_reachable_schedule(rows, first_visit_times, night_list, night_lengths, f
                                              dec=rows.iloc[0]["AstDec(deg)"] * u.deg,
                                              ra_end=rows.iloc[-1]["AstRA(deg)"] * u.deg,
                                              dec_end=rows.iloc[-1]["AstDec(deg)"] * u.deg,
-                                             delta_t=(rows.iloc[-1]["FieldMJD"]
-                                                      - rows.iloc[0]["FieldMJD"]) * u.day,
-                                             obstime=Time(rows.iloc[0]["FieldMJD"], format="mjd"),
+                                             delta_t=(rows.iloc[-1]["FieldMJD_TAI"]
+                                                      - rows.iloc[0]["FieldMJD_TAI"]) * u.day,
+                                             obstime=Time(rows.iloc[0]["FieldMJD_TAI"], format="mjd"),
                                              distances=[1] * u.AU,
                                              radial_velocities=[2] * u.km / u.s,
                                              eph_times=Time(first_visit_times, format="mjd"),
@@ -366,8 +366,8 @@ def first_last_pos_from_id(hex_id, sorted_obs, s3m_cart, distances, radial_veloc
                                        dec=rows.iloc[0]["AstDec(deg)"] * u.deg,
                                        ra_end=rows.iloc[-1]["AstRA(deg)"] * u.deg,
                                        dec_end=rows.iloc[-1]["AstDec(deg)"] * u.deg,
-                                       delta_t=(rows.iloc[-1]["FieldMJD"] - rows.iloc[0]["FieldMJD"]) * u.day,
-                                       obstime=Time(rows.iloc[0]["FieldMJD"], format="mjd"),
+                                       delta_t=(rows.iloc[-1]["FieldMJD_TAI"] - rows.iloc[0]["FieldMJD_TAI"]) * u.day,
+                                       obstime=Time(rows.iloc[0]["FieldMJD_TAI"], format="mjd"),
                                        distances=distances,
                                        radial_velocities=radial_velocities,
                                        eph_times=eph_times,
@@ -427,7 +427,7 @@ def plot_LSST_schedule_with_orbits(schedule, reachable_schedule, ephemerides, jo
                         ha="right", va="top", fontsize=20)
 
             # get the true observations for this night
-            obs_dfs = [pd.read_hdf(f"../neocp/neo/filtered_visit_scores_{i:03d}.h5").sort_values("FieldMJD")[["FieldMJD", "night", "observedTrailedSourceMag", "filter"]]
+            obs_dfs = [pd.read_hdf(f"../neocp/neo/filtered_visit_scores_{i:03d}.h5").sort_values("FieldMJD_TAI")[["FieldMJD_TAI", "night", "observedTrailedSourceMag", "filter"]]
                for i in [0, 1]]
             all_obs = pd.concat(obs_dfs)
             all_obs.reset_index(inplace=True)
@@ -436,7 +436,7 @@ def plot_LSST_schedule_with_orbits(schedule, reachable_schedule, ephemerides, jo
             # if there were observations on this night
             if not nightly_obs.empty:
                 # work out in which fields the detections occurred
-                det_times = nightly_obs["FieldMJD"].values
+                det_times = nightly_obs["FieldMJD_TAI"].values
                 field_times = table[table_mask]["observationStartMJD"]
                 ids = [(det_time - field_times[field_times <= det_time]).idxmin() for det_time in det_times]
                 det_fields = table.loc[ids]
