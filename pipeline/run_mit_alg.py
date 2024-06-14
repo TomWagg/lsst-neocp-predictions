@@ -1,4 +1,4 @@
-from detection_probability import get_detection_probabilities
+from mitigation import get_detection_probabilities
 import time
 
 run_start = time.time()

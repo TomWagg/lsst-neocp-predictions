@@ -21,15 +21,14 @@ import thor
 from thor.backend import PYOORB
 backend = PYOORB()
 
+import sys
+sys.path.append("../src")
+
 from variant_orbits import variant_orbit_ephemerides
 from scheduling import get_LSST_schedule
 from magnitudes import convert_colour_mags
 
-import sys
-sys.path.append("../current_criteria")
-from lsst_neocp import find_first_file, find_last_file
-
-NIGHT_ZERO = 60217
+NIGHT_ZERO = 60795
 
 
 def filter_tracklets(df, min_obs=2, min_arc=1, max_time=90):
@@ -41,10 +40,10 @@ def filter_tracklets(df, min_obs=2, min_arc=1, max_time=90):
                                   df["mjd_utc"].diff().min() * 1440 < max_time))
 
 
-def get_detection_probabilities(night_start, obj_type="neo", detection_window=15, min_nights=3,
+def get_detection_probabilities(night_start, detection_window=15, min_nights=3,
                                 schedule_type="predicted", pool_size=48,
-                                in_path="/epyc/projects/neocp-predictions/current_criteria/",
-                                out_path="/epyc/projects/neocp-predictions/mitigation_algorithm/latest_runs/",
+                                in_path="/epyc/projects/neocp-predictions/output/synthetic_obs/",
+                                out_path="/epyc/projects/neocp-predictions/output/mitigation_results/",
                                 fov_map_path="/epyc/ssd/users/tomwagg/rubin_sim_data/maf/fov_map.npz",
                                 save_results=True):
     """Get the probability that LSST will detect each object that was observed in a particular night
@@ -53,8 +52,6 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
     ----------
     night_start : `int`
         Night of the initial observations
-    obj_type : `str`, optional
-        Object type used to get/set paths to file, by default "neo", other option is "mba"
     detection_window : `int`, optional
         How many days in the detection window, by default 15
     min_nights : `int`, optional
@@ -72,7 +69,6 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
         List of unique hex ids that have digest2 > 65 that were observed on `night_start`
     """
     lap = time.time()
-    path = os.path.join(in_path, obj_type)
 
     # create a list of nights in the detection window and get schedule for them
     night_list = list(range(night_start, night_start + detection_window))
@@ -101,22 +97,12 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
     night_transition = full_schedule["night"] != full_schedule["previousNight"]
     first_visit_times = full_schedule[night_transition]["observationStartMJD"].values.astype(float)
 
-    last_times_ind = np.array(list(full_schedule[night_transition].index[1:]) + [len(full_schedule)]) - 1
-
     print(f"[{time.time() - lap:1.1f}s] Schedule is loaded in and ready!")
     lap = time.time()
 
-    # work out which visit files contain the observations
-    start_file = find_first_file(list(range(night_start - detection_window + 1, night_start)))
-    end_file = find_last_file(night_list)
-
-    # either open one file or concatenate a bunch of them
-    if start_file == end_file or start_file is None:
-        all_obs = pd.read_hdf(path + f"filtered_visit_scores_{end_file:03d}.h5").sort_values("FieldMJD")
-    else:
-        obs_dfs = [pd.read_hdf(path + f"filtered_visit_scores_{i:03d}.h5").sort_values("FieldMJD")
-                   for i in range(start_file, end_file + 1)]
-        all_obs = pd.concat(obs_dfs)
+    obs_dfs = [pd.read_hdf(os.path.join(in_path), f"filtered_night_{i:04d}_with_scores_trimmed.h5").sort_values("FieldMJD_TAI")
+                for i in range(night_start - detection_window + 1, night_list[-1])]
+    all_obs = pd.concat(obs_dfs)
 
     print(f"[{time.time() - lap:1.1f}s] Observation files read in")
     lap = time.time()
@@ -124,23 +110,17 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
     # get the sorted observations for the start night (that have digest2 > 65, >= 3 obs)
     sorted_obs = all_obs[(all_obs["night"] == night_start)
                          & (all_obs["scores"] >= 65)
-                         & (all_obs["n_obs"] >= 3)].sort_values(["ObjID", "FieldMJD"])
-
-    # if we are doing NEOs, remove any that would leave a trail in an LSST exposure
-    if obj_type == "neo":
-        streakers = pd.read_hdf('neo_streakers.h5', key='df')
-        no_streaks = ~(np.isin(sorted_obs["ObjID"], streakers["ObjID"][streakers["night"] == night_start]))
-        sorted_obs = sorted_obs[no_streaks]
-
-    unique_objs = sorted_obs.index.unique()
+                         & (all_obs["n_obs"] >= 3)
+                         & (all_obs["ang_vel"] < 1.5)].sort_values(["ObjID", "FieldMJD_TAI"])
+    unique_objs = sorted_obs['hex_id'].unique()
 
     # work out which objects would have already been found before tonight and remove them
     # note: the reduced_nights decreases the array size before the `isin` call
-    detection_nights = pd.read_hdf(f"findable_obs_{obj_type}.h5")
+    detection_nights = pd.read_hdf(os.path.join(in_path, f"findable_obs_year_1.h5"))
     reduced_nights = detection_nights.loc[list(set(detection_nights.index).intersection(set(unique_objs)))]
     already_found_ids = reduced_nights[reduced_nights < night_start].index
-    sorted_obs = sorted_obs[~np.isin(sorted_obs.index, already_found_ids)]
-    unique_objs = sorted_obs.index.unique()
+    sorted_obs = sorted_obs[~np.isin(sorted_obs["hex_id"], already_found_ids)]
+    unique_objs = sorted_obs["hex_id"].unique()
 
     # get the prior observations that occurred in the past detection window that could possibly contribute
     all_obs = all_obs[(all_obs["night"] > night_start - detection_window) & (all_obs["night"] < night_start)]
@@ -160,6 +140,8 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
     print(f"[{time.time() - lap:1.1f}s] Everything is prepped and ready for probability calculations")
     lap = time.time()
 
+    sorted_obs.set_index("hex_id", inplace=True)
+
     # calculate detection probabilities
     with Pool(pool_size) as pool:
         probs = pool.map(partial(probability_from_id, sorted_obs=sorted_obs,
@@ -174,7 +156,7 @@ def get_detection_probabilities(night_start, obj_type="neo", detection_window=15
     print(f"Finished with the pool! [{time.time() - lap:1.1f}s]")
 
     if save_results:
-        np.save(os.path.join(out_path, f"{obj_type}_night{night_start}_probs.npy"), (probs, unique_objs))
+        np.save(os.path.join(out_path, f"night{night_start}_probs.npy"), (probs, unique_objs))
 
     return probs, unique_objs
 
@@ -225,8 +207,8 @@ def probability_from_id(hex_id, sorted_obs, distances, radial_velocities, prior_
     if len(reachable_schedule) == 0:
         return 0.0
 
-    v_mags = [convert_colour_mags(r["MaginFilter"],
-                                  in_colour=r["filter"], out_colour="V") for _, r in rows.iterrows()]
+    v_mags = [convert_colour_mags(r["observedTrailedSourceMag"],
+                                  in_colour=r["optFilter"], out_colour="V") for _, r in rows.iterrows()]
     apparent_mag = np.mean(v_mags)
 
     # get the orbits for the entire reachable schedule with the grid of distances and RVs
@@ -234,8 +216,8 @@ def probability_from_id(hex_id, sorted_obs, distances, radial_velocities, prior_
                                             dec=rows.iloc[0]["AstDec(deg)"] * u.deg,
                                             ra_end=rows.iloc[-1]["AstRA(deg)"] * u.deg,
                                             dec_end=rows.iloc[-1]["AstDec(deg)"] * u.deg,
-                                            delta_t=(rows.iloc[-1]["FieldMJD"] - rows.iloc[0]["FieldMJD"]) * u.day,
-                                            obstime=Time(rows.iloc[0]["FieldMJD"], format="mjd"),
+                                            delta_t=(rows.iloc[-1]["FieldMJD_TAI"] - rows.iloc[0]["FieldMJD_TAI"]) * u.day,
+                                            obstime=Time(rows.iloc[0]["FieldMJD_TAI"], format="mjd"),
                                             distances=distances,
                                             radial_velocities=radial_velocities,
                                             apparent_mag=apparent_mag,
@@ -445,7 +427,7 @@ def plot_LSST_schedule_with_orbits(schedule, reachable_schedule, ephemerides, jo
                         ha="right", va="top", fontsize=20)
 
             # get the true observations for this night
-            obs_dfs = [pd.read_hdf(f"../neocp/neo/filtered_visit_scores_{i:03d}.h5").sort_values("FieldMJD")[["FieldMJD", "night", "MaginFilter", "filter"]]
+            obs_dfs = [pd.read_hdf(f"../neocp/neo/filtered_visit_scores_{i:03d}.h5").sort_values("FieldMJD")[["FieldMJD", "night", "observedTrailedSourceMag", "filter"]]
                for i in [0, 1]]
             all_obs = pd.concat(obs_dfs)
             all_obs.reset_index(inplace=True)
@@ -475,7 +457,7 @@ def plot_LSST_schedule_with_orbits(schedule, reachable_schedule, ephemerides, jo
 
                 print("Previous magnitudes:", night)
                 prev_mags = all_obs[np.logical_and(all_obs["hex_id"] == hex_id, all_obs["night"] <= night)].copy()
-                prev_v_band = [convert_colour_mags(r["MaginFilter"], in_colour=r["filter"], out_colour="V") for i, r in prev_mags.iterrows()]
+                prev_v_band = [convert_colour_mags(r["observedTrailedSourceMag"], in_colour=r["filter"], out_colour="V") for i, r in prev_mags.iterrows()]
                 prev_mags["VMag"] = prev_v_band
                 print(prev_mags)
 
