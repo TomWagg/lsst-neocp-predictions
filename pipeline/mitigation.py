@@ -28,7 +28,7 @@ from variant_orbits import variant_orbit_ephemerides
 from scheduling import get_LSST_schedule
 from magnitudes import convert_colour_mags
 
-NIGHT_ZERO = 60795
+NIGHT_ZERO = 60796
 
 
 def filter_tracklets(df, min_obs=2, min_arc=1, max_time=90):
@@ -74,10 +74,10 @@ def get_detection_probabilities(night_start, detection_window=15, min_nights=3,
     night_list = list(range(night_start, night_start + detection_window))
 
     if schedule_type == "predicted":
-        full_schedule = get_LSST_schedule(night=night_start, schedule_type=schedule_type)
+        full_schedule = get_LSST_schedule(night=night_start, schedule_type=schedule_type, night_zero=NIGHT_ZERO)
     else:
         full_schedule = get_LSST_schedule(night=(night_start, night_start + detection_window - 1),
-                                          schedule_type=schedule_type)
+                                          schedule_type=schedule_type, night_zero=NIGHT_ZERO)
 
     # offset the schedule by one row and re-merge to get the previous night column
     shifted = full_schedule.shift()
@@ -347,10 +347,10 @@ def get_reachable_schedule(rows, first_visit_times, night_list, night_lengths, f
         night = (start_orbits.loc[j]["mjd_utc"] - 0.5).astype(int) - NIGHT_ZERO
 
         mask = full_schedule["night"] == night
-        within_lims = np.logical_and.reduce((full_schedule[mask]["fieldRA"] > ra_lims[0],
-                                             full_schedule[mask]["fieldRA"] < ra_lims[1],
-                                             full_schedule[mask]["fieldDec"] > dec_lims[0],
-                                             full_schedule[mask]["fieldDec"] < dec_lims[1]))
+        within_lims = ((full_schedule[mask]["fieldRA"] > ra_lims[0])
+                       & (full_schedule[mask]["fieldRA"] < ra_lims[1])
+                       & (full_schedule[mask]["fieldDec"] > dec_lims[0])
+                       & (full_schedule[mask]["fieldDec"] < dec_lims[1]))
         masked_schedules[night_list.index(night)] = full_schedule[mask][within_lims]
     # combine into a single reachable schedule
     return pd.concat(masked_schedules)
