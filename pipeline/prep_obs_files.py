@@ -17,6 +17,7 @@ def prune_night_file(night, path="/epyc/projects/neocp-predictions/output/synthe
             df.reset_index(inplace=True, drop=True)
         
             filtered_df = trackletfilter.filter_observations(df, min_obs=3, min_arc=1, max_time=90)
+            filtered_df["optFilter"] = filtered_df["optFilter"].astype("str")
             filtered_df.to_hdf(os.path.join(path, f"filtered_night_{night:04d}.h5"), key="df")
         print(night, "done")
     except:
