@@ -12,7 +12,7 @@ def create_findable_obs_tables(min_nights=3, detection_window=15, nights=range(3
     # get all of the observations
     obs_dfs = [None for _ in nights]
     for i, night in enumerate(nights):
-        file_path = f"../output/synthetic_obs/filtered_night_{night:04d}_with_scores_trimmed.h5"
+        file_path = f"../output/synthetic_obs/filtered_night_{night:04d}_with_scores.h5"
         if os.path.exists(file_path):
             obs_dfs[i] = pd.read_hdf(file_path)[["FieldMJD_TAI", "night", "hex_id"]].sort_values("FieldMJD_TAI")
 
