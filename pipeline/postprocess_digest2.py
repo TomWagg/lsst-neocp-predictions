@@ -29,7 +29,9 @@ def create_final_file(night, path="/epyc/projects/neocp-predictions/output/"):
     digest2_df.set_index("hex_id", inplace=True)
     
     df["scores"] = df["hex_id"].map(digest2_df["NEO"])
-    df["ang_vel"] = df["hex_id"].map(df.groupby("hex_id").apply(trackletfilter.tracklet_speed))
+
+    if "ang_vel" not in df.columns:
+        df["ang_vel"] = df["hex_id"].map(df.groupby("hex_id").apply(trackletfilter.tracklet_speed))
     
     df.to_hdf(os.path.join(path, f"synthetic_obs/filtered_night_{night:04d}_with_scores.h5"), key="df")
 
