@@ -13,7 +13,7 @@ def create_final_file(night, path="/epyc/projects/neocp-predictions/output/"):
     elif not os.path.isfile(os.path.join(path, f"synthetic_obs/filtered_night_{night:04d}.h5")):
         print(f"No synthetic obs file found for night {night:04d}")
         return
-    elif not os.path.isfile(os.path.join(path, f"digest2_output/night_{night:04d}.dat")):
+    elif not os.path.isfile(os.path.join(path, f"digest2_output/night_{night:04d}.filtered.dat")):
         out_path = os.path.join(path, "digest2_output/")
         b = f"grep -a -v tracklet {out_path}night_{night:04d}.dat > {out_path}night_{night:04d}.filtered.dat"
         subprocess.call(b, shell=True)
