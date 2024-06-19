@@ -42,6 +42,7 @@ def get_LSST_schedule(night, night_zero=60796, schedule_type="predicted",
     """
 
     if schedule_type == "actual":
+        print(os.path.join(schedule_path, 'baseline_v3.3_1yrs.db'))
         con = sqlite3.connect(os.path.join(schedule_path, 'baseline_v3.3_1yrs.db'))
         cur = con.cursor()
 
@@ -56,8 +57,10 @@ def get_LSST_schedule(night, night_zero=60796, schedule_type="predicted",
         df["night"] = (df["observationStartMJD"] - 0.5).astype(int) - night_zero
     elif schedule_type == "predicted":
         first_night = get_LSST_schedule(night=night, night_zero=night_zero,
-                                        schedule_type="actual", fields=fields)
+                                        schedule_type="actual", fields=fields,
+                                        schedule_path=schedule_path)
 
+        print(os.path.join(schedule_path, f'night{night + 1}_15days.db'))
         con = sqlite3.connect(os.path.join(schedule_path, f'night{night + 1}_15days.db'))
         cur = con.cursor()
         res = cur.execute(f"select {','.join(fields)} from observations where night between {night + 2} and {night + 15}")
