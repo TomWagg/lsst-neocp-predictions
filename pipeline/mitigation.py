@@ -70,14 +70,21 @@ def get_detection_probabilities(night_start, detection_window=15, min_nights=3,
     """
     lap = time.time()
 
+    if not os.path.exists(os.path.join(in_path, f"filtered_night_{night_start:04d}_with_scores.h5")):
+        print(f"Night {night_start} does not exist")
+        return None, None
+
     # create a list of nights in the detection window and get schedule for them
     night_list = list(range(night_start, night_start + detection_window))
 
     if schedule_type == "predicted":
-        full_schedule = get_LSST_schedule(night=night_start, schedule_type=schedule_type, night_zero=NIGHT_ZERO)
+        full_schedule = get_LSST_schedule(night=night_start, schedule_type=schedule_type,
+                                          night_zero=NIGHT_ZERO,
+                                          schedule_path=in_path.replace("synthetic_obs", "predicted_schedules"))
     else:
         full_schedule = get_LSST_schedule(night=(night_start, night_start + detection_window - 1),
-                                          schedule_type=schedule_type, night_zero=NIGHT_ZERO)
+                                          schedule_type=schedule_type, night_zero=NIGHT_ZERO,
+                                          schedule_path=in_path.replace("synthetic_obs", "predicted_schedules"))
 
     # offset the schedule by one row and re-merge to get the previous night column
     shifted = full_schedule.shift()

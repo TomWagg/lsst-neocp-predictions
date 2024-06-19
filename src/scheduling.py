@@ -1,6 +1,7 @@
 import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 plt.rc('font', family='serif')
 plt.rcParams['text.usetex'] = False
@@ -22,7 +23,8 @@ plt.rcParams.update(params)
 
 def get_LSST_schedule(night, night_zero=60796, schedule_type="predicted",
                       fields=["fieldRA", "fieldDec", "observationStartMJD",
-                              "filter", "fiveSigmaDepth", "rotSkyPos"]):
+                              "filter", "fiveSigmaDepth", "rotSkyPos"],
+                      schedule_path='/epyc/projects/neocp-predictions/output/predicted_schedules/'):
     """Get the schedule for LSST (where it will point at what time)
 
     Parameters
@@ -40,7 +42,7 @@ def get_LSST_schedule(night, night_zero=60796, schedule_type="predicted",
     """
 
     if schedule_type == "actual":
-        con = sqlite3.connect('/epyc/projects/neocp-predictions/output/baseline_v3.3_1yrs.db')
+        con = sqlite3.connect(os.path.join(schedule_path, 'baseline_v3.3_1yrs.db'))
         cur = con.cursor()
 
         if isinstance(night, int):
@@ -56,7 +58,7 @@ def get_LSST_schedule(night, night_zero=60796, schedule_type="predicted",
         first_night = get_LSST_schedule(night=night, night_zero=night_zero,
                                         schedule_type="actual", fields=fields)
 
-        con = sqlite3.connect(f'/epyc/projects/neocp-predictions/mitigation_algorithm/predicted_schedules/night{night + 1}_15days.db')
+        con = sqlite3.connect(os.path.join(schedule_path, f'night{night + 1}_15days.db'))
         cur = con.cursor()
         res = cur.execute(f"select {','.join(fields)} from observations where night between {night + 2} and {night + 15}")
         rest = pd.DataFrame(res.fetchall(), columns=fields)
