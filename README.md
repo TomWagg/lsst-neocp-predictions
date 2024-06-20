@@ -1,4 +1,6 @@
-<div align="center">
+
+# Predictions for the NEOCP in the Era of LSST
+<!--<div align="center">
   <img src="header_img.png" width="100%">
 </div>
 
@@ -19,4 +21,4 @@
 
 <p align="center">This repository contains the code for reproducing the results of Wagg+2023 and all figures in high resolution form.</p>
 
-TODO: Add citation information later
+TODO: Add citation information later-->
